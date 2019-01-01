@@ -1,28 +1,32 @@
+variable "region" {
+  default = "us-east-1"
+}
+
 provider "aws" {
-  # region          = "us-east-1"
-  # region          = "us-east-2"
-  # region          = "us-west-1"
-  # region          = "us-west-2"
-  region          = "ap-south-1"
-  # region          = "ap-northeast-2"
-  # region          = "ap-southeast-1"
-  # region          = "ap-southeast-2"
-  # region          = "ap-northeast-1"
-  # region          = "eu-central-1"
-  # region          = "eu-west-1"
-  # region          = "eu-west-2"
-  # region          = "eu-west-3"
-  # region          = "eu-north-1"
-  # region          = "ca-central-1"
-  # region          = "cn-north-1"
-  # region          = "sa-east-1"
+  region = "${var.region}"
+  # region          = "us-east-1" # Virginia
+  # region          = "us-east-2" # Ohio
+  # region          = "us-west-1" # California
+  # region          = "us-west-2" # Oregon
+  # region          = "ap-south-1" # Mumbai
+  # region          = "ap-northeast-1" # Tokyo
+  # region          = "ap-northeast-2" # Seoul
+  # region          = "ap-southeast-1" # Singapore
+  # region          = "ap-southeast-2" # Sydney
+  # region          = "eu-central-1" # Frankfurt
+  # region          = "eu-west-1" # Ireland
+  # region          = "eu-west-2" # London
+  # region          = "eu-west-3" # Paris
+  # region          = "eu-north-1" # Stockholm
+  # region          = "ca-central-1" # Montreal
+  # region          = "sa-east-1" # Sao Paulo
 }
 
 resource "aws_instance" "ssocks" {
   count           = 1 # number of copies to spin up - if you put 1000 here, your bill might surprise you...
   ami             = "${data.aws_ami.ubuntu.id}"
   instance_type   = "t2.micro"
-  key_name        = "narc_key"
+  key_name        = "ssocks_key"
   security_groups = [
     "${aws_security_group.ssh_https.name}"
   ]
@@ -32,7 +36,7 @@ resource "aws_instance" "ssocks" {
     connection {
       type        = "ssh"
       user        = "ubuntu"
-      private_key = "${file("~/.ssh/narc_key.pem")}"
+      private_key = "${file("~/.ssh/ssocks_key.pem")}"
     }
   }
 
@@ -78,7 +82,7 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
   }
 
   owners = ["099720109477"] # Canonical
