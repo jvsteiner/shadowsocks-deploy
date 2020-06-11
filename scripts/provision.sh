@@ -7,7 +7,7 @@ sudo bash -c 'cat >~/config.json <<EOL
 {
     "server":"0.0.0.0",
     "server_port":443,
-    "password":"supersecret",
+    "password":"holymoly",
     "timeout":300,
     "method":"aes-256-cfb",
     "fast_open": true

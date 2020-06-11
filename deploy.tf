@@ -3,8 +3,8 @@ variable "region" {
 }
 
 provider "aws" {
-  region = "${var.region}"
-  # region          = "us-east-1" # Virginia
+  # region = "${var.region}"
+  region = "us-east-1" # Virginia
   # region          = "us-east-2" # Ohio
   # region          = "us-west-1" # California
   # region          = "us-west-2" # Oregon
@@ -23,57 +23,58 @@ provider "aws" {
 }
 
 resource "aws_instance" "ssocks" {
-  count           = 1 # number of copies to spin up - if you put 1000 here, your bill might surprise you...
-  ami             = "${data.aws_ami.ubuntu.id}"
-  instance_type   = "t2.micro"
-  key_name        = "ssocks_key"
+  count         = 1 # number of copies to spin up - if you put 1000 here, your bill might surprise you...
+  ami           = "${data.aws_ami.ubuntu.id}"
+  instance_type = "t2.micro"
+  key_name      = "ssocks_key"
   security_groups = [
     "${aws_security_group.ssh_https.name}"
   ]
 
   provisioner "remote-exec" {
-    script        = "scripts/provision.sh"
+    script = "scripts/provision.sh"
     connection {
       type        = "ssh"
       user        = "ubuntu"
       private_key = "${file("~/.ssh/ssocks_key.pem")}"
+      host        = self.public_ip
     }
   }
 
   # Return the public dns names into a local file for later use.
   provisioner "local-exec" {
-    command       = "echo ${self.public_dns} >> public_dns.txt"
+    command = "echo ${self.public_dns} >> public_dns.txt"
   }
 }
 
 resource "aws_security_group" "ssh_https" {
-  count           = 1
-  name            = "ssh_https"
-  description     = "Allow all inbound traffic"
+  # count       = 1
+  name        = "ssh_https"
+  description = "Allow all inbound traffic"
 
   ingress {
-    from_port     = 443
-    to_port       = 443
-    protocol      = "tcp"
-    cidr_blocks   = ["0.0.0.0/0"]
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port     = 22
-    to_port       = 22
-    protocol      = "tcp"
-    cidr_blocks   = ["0.0.0.0/0"]
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
-    from_port     = 0
-    to_port       = 65535
-    protocol      = "tcp"
-    cidr_blocks   = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags            = {
-    Name          = "ssh_https"
+  tags = {
+    Name = "ssh_https"
   }
 }
 
@@ -90,13 +91,13 @@ data "aws_ami" "ubuntu" {
 
 resource "null_resource" "after_cleanup" {
   provisioner "local-exec" {
-    when          = "destroy"
-    command       = "rm -f public_dns.txt"
+    when    = destroy
+    command = "rm -f public_dns.txt"
   }
 }
 
 resource "null_resource" "before_cleanup" {
   provisioner "local-exec" {
-    command       = "rm -f public_dns.txt"
+    command = "rm -f public_dns.txt"
   }
 }
